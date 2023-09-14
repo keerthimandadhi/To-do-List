@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>To-Do List</title>
+    <style>body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background-color: rgb(241, 140, 241);
+    }
+    
+    .container {
+        background: rgb(237, 80, 237);
+        padding: 20px;
+        border-radius: 10px;
+        max-width: 1000px;
+        margin: 0 auto;
+        text-align: center;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    h1 {
+        font-size: 32px;
+        margin-bottom: 20px;
+        color: white;
+    }
+    
+    .input-container {
+        display: flex;
+        margin-bottom: 20px;
+    }
+    
+    input[type="text"] {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+    
+    button {
+        background-color: purple;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    
+    ul {
+        list-style: none;
+        padding: 0;
+    }
+    
+    li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .checkbox {
+        margin-right: 10px;
+    }
+    
+    .delete-button {
+        background-color:red;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+    
+    .completed {
+        text-decoration: line-through;
+    }
+    
+    .progress-bar {
+        background-color: #ddd;
+        border-radius: 5px;
+        height: 20px;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+    
+    .progress {
+        background-color: purple;
+        width: 0;
+        height: 100%;
+        transition: width 0.3s;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Daily Questions</h1>
+        <div class="input-container">
+            <input type="text" id="taskInput" placeholder="Add a task...">
+            <button id="addTask">Add</button>
+        </div>
+        <ul id="taskList">
+            <!-- Tasks will be added here dynamically -->
+        </ul>
+        <div class="progress-bar">
+            <div id="progress" class="progress"></div>
+        </div>
+    </div>
+
+    <script>document.addEventListener('DOMContentLoaded', () => {
+        const taskInput = document.getElementById('taskInput');
+        const addTaskButton = document.getElementById('addTask');
+        const taskList = document.getElementById('taskList');
+        const progress = document.getElementById('progress');
+    
+        // Load tasks from local storage when the page loads
+        const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        for (const taskText of savedTasks) {
+            createTask(taskText);
+        }
+    
+        addTaskButton.addEventListener('click', () => {
+            const taskText = taskInput.value.trim();
+            if (taskText !== '') {
+                createTask(taskText);
+                taskInput.value = '';
+    
+                // Update progress bar
+                updateProgressBar();
+    
+                // Save tasks to local storage
+                saveTasks();
+            }
+        });
+    
+        taskList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-button')) {
+                e.target.parentElement.remove();
+    
+                // Update progress bar
+                updateProgressBar();
+    
+                // Save tasks to local storage
+                saveTasks();
+            } else if (e.target.classList.contains('checkbox')) {
+                const task = e.target.parentElement;
+                task.classList.toggle('completed');
+    
+                // Update progress bar
+                updateProgressBar();
+    
+                // Save tasks to local storage
+                saveTasks();
+            }
+        });
+    
+        function createTask(taskText) {
+            const li = document.createElement('li');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'checkbox';
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.className = 'delete-button';
+    
+            li.appendChild(checkbox);
+            li.appendChild(document.createTextNode(taskText));
+            li.appendChild(deleteButton);
+    
+            taskList.appendChild(li);
+        }
+    
+        function updateProgressBar() {
+            const totalTasks = taskList.children.length;
+            const completedTasks = taskList.querySelectorAll('.completed').length;
+            const percentage = totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100;
+    
+            progress.style.width = percentage + '%';
+        }
+    
+        // Function to save tasks to local storage
+        function saveTasks() {
+            const tasks = [];
+            const taskItems = taskList.querySelectorAll('li');
+            taskItems.forEach((item) => {
+                tasks.push(item.textContent);
+            });
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+    });
+    
+    </script>
+</body>
+</html>
